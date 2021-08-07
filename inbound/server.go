@@ -231,18 +231,18 @@ func (handler *Handler) ServeDNS(writer dns.ResponseWriter, request *dns.Msg) {
 		}
 	}
 	// 先用clean组dns解析
-	group = handler.Groups["clean"] // 设置group变量以在defer里添加ipset
+	group = handler.Groups["inside"] // 设置group变量以在defer里添加ipset
 	r = group.CallDNS(ctx, request)
 	if allInRange(r, handler.CNIP) {
 		// 未出现非cn ip，流程结束
-		utils.CtxInfo(ctx, "cn/empty ipv4, group: clean")
+		utils.CtxInfo(ctx, "cn/empty ipv4, group: inside")
 	} else if blocked, ok := handler.GFWMatcher.Match(question.Name); !ok || !blocked {
 		// 出现非cn ip但域名不匹配gfwlist，流程结束
-		utils.CtxInfo(ctx, "not match gfwlist, group: clean")
+		utils.CtxInfo(ctx, "not match gfwlist, group: inside")
 	} else {
 		// 出现非cn ip且域名匹配gfwlist，用dirty组dns再次解析
-		utils.CtxInfo(ctx, "match gfwlist, group: dirty")
-		group = handler.Groups["dirty"] // 设置group变量以在defer里添加ipset
+		utils.CtxInfo(ctx, "match gfwlist, group: outside")
+		group = handler.Groups["outside"] // 设置group变量以在defer里添加ipset
 		r = group.CallDNS(ctx, request)
 	}
 	// 设置dns缓存
@@ -285,7 +285,7 @@ func (handler *Handler) IsValid() bool {
 	if handler.Groups == nil {
 		return false
 	}
-	clean, dirty := handler.Groups["clean"], handler.Groups["dirty"]
+	clean, dirty := handler.Groups["inside"], handler.Groups["outside"]
 	if clean == nil || len(clean.Callers) <= 0 || dirty == nil || len(dirty.Callers) <= 0 {
 		log.Errorf("dns of clean/dirty group cannot be empty")
 		return false

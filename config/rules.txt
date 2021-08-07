@@ -1,0 +1,9 @@
+trip2w.com
+pylab.me
+*.gstatic.com
+gstatic.com
+
+jd.com
+qq.com
+.baidu.com
+*.taobao.com

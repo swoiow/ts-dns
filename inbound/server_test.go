@@ -52,7 +52,7 @@ func TestHandler_Resolve(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, caller2)
 	callers := []outbound.Caller{caller1, caller2, &outbound.DNSCaller{}}
-	handler.Groups = map[string]*Group{"clean": {Callers: callers}}
+	handler.Groups = map[string]*Group{"inside": {Callers: callers}}
 }
 
 func TestHandler(t *testing.T) {
@@ -64,7 +64,7 @@ func TestHandler(t *testing.T) {
 	handler.QLogger = NewQueryLogger(log.New(), []string{"AAAA"}, false, false)
 	callers := []outbound.Caller{&outbound.DNSCaller{}}
 	group := &Group{Callers: callers, Matcher: matcher.NewABPByText(""), IPSet: &ipset.IPSet{}}
-	handler.Groups = map[string]*Group{"clean": group, "dirty": group}
+	handler.Groups = map[string]*Group{"inside": group, "outside": group}
 	// 初始化所需参数和返回值
 	resp := &dns.Msg{Answer: []dns.RR{&dns.A{A: net.ParseIP("1.1.1.1")}}}
 	writer, req := &MockRespWriter{}, &dns.Msg{}
